@@ -62,7 +62,7 @@ class ConvBlock(torch.nn.Module):
                  max_pool=True,
                  max_pool_factor=1.0):
         super(ConvBlock, self).__init__()
-        stride = (int(2 * max_pool_factor), int(2 * max_pool_factor))
+        stride = (1, int(2 * max_pool_factor))
         if max_pool:
             self.max_pool = torch.nn.MaxPool2d(
                 kernel_size=stride,
@@ -93,10 +93,12 @@ class ConvBlock(torch.nn.Module):
         maml_init_(self.conv)
 
     def forward(self, x):
+        # print('in block',x.shape)
         x = self.conv(x)
         x = self.normalize(x)
         x = self.relu(x)
         x = self.max_pool(x)
+        # print('out block',x.shape)
         return x
 
 
@@ -188,22 +190,33 @@ class CNN4(torch.nn.Module):
         )
         self.features = torch.nn.Sequential(
             base,
-            l2l.nn.Flatten(),
+#             l2l.nn.Flatten(),
         )
         self.classifier = torch.nn.Linear(
             hidden_size,
-            output_size,
+            1,
             bias=True,
         )
         maml_init_(self.classifier)
         self.hidden_size = hidden_size
         self.features_only = features_only
+        
 
     def forward(self, x):
         x = self.features(x)
+        x = torch.squeeze(x).permute(0, 2, 1)
+        # print(x.shape)
         if self.features_only:
             return x
+        
+        unflatten = torch.nn.Unflatten(0, (x.shape[0:2]))
+        # print(x.shape)
+        x = torch.flatten(x, 0, 1)
+        # print(x.shape)
         x = self.classifier(x)
+        # print(x.shape)
+        x = unflatten(x).squeeze()
+        # print(x.shape)
         return x
 
 

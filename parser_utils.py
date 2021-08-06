@@ -38,6 +38,9 @@ def get_args():
     parser.add_argument('--meta_learning_rate', type=float, default=0.001, help='Learning rate of overall MAML system')
     parser.add_argument('--meta_opt_bn', type=str, default="False")
     parser.add_argument('--task_learning_rate', type=float, default=0.1, help='Learning rate per task gradient step')
+    parser.add_argument('--meta_lr', type=float, default=0.001, help='Learning rate of overall MAML system')
+    parser.add_argument('--task_lr', type=float, default=0.1, help='Learning rate per task gradient step')
+    parser.add_argument('--adapt_steps', type=int, default=5, help='Number of inner loop adaptation steps')
 
     parser.add_argument('--vali_every_n_ep', type=int, default=20, help='Validate model every n epochs')
     parser.add_argument('--copies_of_vali_metrics', type=int, default=50, help='Copies of the validation metrics in one validation')
@@ -48,6 +51,7 @@ def get_args():
     parser.add_argument('--max_pooling', type=str, default="False")
     parser.add_argument('--per_step_bn_statistics', type=str, default="False")
     parser.add_argument('--num_classes_per_set', type=int, default=20, help='Number of classes to sample per set')
+    parser.add_argument('--ways', type=int, default=20, help='Number of ways to replace the above')
     parser.add_argument('--cnn_layers', type=int, default=4, help='Number of classes to sample per set')
     parser.add_argument('--number_of_training_steps_per_iter', type=int, default=1, help='Number of classes to sample per set')
     parser.add_argument('--number_of_evaluation_steps_per_iter', type=int, default=1, help='Number of classes to sample per set')
@@ -70,10 +74,11 @@ def get_args():
     parser.add_argument('--sample_metric', type=str, default="True", help='Sampling metrics from continuous space for comms data gen')
     parser.add_argument('--name', type=str, default="tmp")
     parser.add_argument('--task_aug', type=str, default="None")
-    
+    parser.add_argument('--start_iter', type=int, default=0, help='starting an experiment at step')
+    parser.add_argument('--resume', action='store_true', default=False, help='resuming an experiment, use in conjunction with start_iter')
     parser.add_argument('--save_adapt_acts', type=str, default="None")
-    parser.add_argument('--test_dataset', type=str, default="realdata64_v2")
-    
+    parser.add_argument('--test_dataset', type=str, default="synth")
+    parser.add_argument('--tb_depth', type=int, default=2, help="viterbi param. indicating memory length")
     args = parser.parse_args()
     args_dict = vars(args)
     if args.name_of_args_json_file is not "None":

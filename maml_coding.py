@@ -74,6 +74,9 @@ def comms_bler(y_targ, y_pred):
 def fast_adapt(batch, learner, loss, adaptation_steps, shots, ways, device):
     adaptation_data, adaptation_labels, evaluation_data, evaluation_labels = batch
 
+    # print("adaptation_labels ", adaptation_labels[0])
+    # print("evaluation_labels ", evaluation_labels[0])
+    # exit()
     # Adapt the model
     for step in range(adaptation_steps):
         adaptation_error = loss(learner(adaptation_data), adaptation_labels)
@@ -103,7 +106,7 @@ def eva_wo_adapt(batch, learner, loss, device):
 
 def main(args, device):
     # process the args
-    ways = args.num_classes_per_set
+    ways = args.ways# args.num_classes_per_set
     shots = args.train_num_samples_per_class
     seed = args.train_seed
     meta_batch_size = args.batch_size
@@ -121,10 +124,12 @@ def main(args, device):
         torch.backends.cudnn.benchmark = True
 
     # specify some details manually - based on L2L implementation
-    meta_lr = 0.001  # 0.003
-    fast_lr = 0.1
-    adaptation_steps = 5
-    num_iterations = 50000
+    meta_lr = args.meta_lr #0.001  # 0.003
+    fast_lr = args.task_lr #0.1 
+    adaptation_steps = args.adapt_steps#5
+
+    print("Meta LR ", meta_lr, " inner loop LR ", fast_lr, " adaptation steps ", adaptation_steps)
+    num_iterations = 200000
     meta_valid_freq = 10000
     save_model_freq = 2000
 
@@ -142,13 +147,23 @@ def main(args, device):
     model = CNN4(args.image_height, hidden_size=args.cnn_filter, layers=args.cnn_layers )
     model = model.to(device)
     maml = l2l.algorithms.MAML(model, lr=fast_lr, first_order=False)
+
+    if args.resume:
+        print("resuming run and loading model from ",  os.path.join('models/', args.name + "_" + str(args.start_iter) + '.pt'))
+        model_path = os.path.join('models/', args.name + "_" + str(args.start_iter) + '.pt')#('edin_models_final', args.name) + '_49999.pt'
+        print("model path loading from ", model_path)
+        maml.load_state_dict(torch.load(model_path))
+    
     opt = optim.Adam(maml.parameters(), meta_lr)
     loss = nn.BCEWithLogitsLoss()
 
-    create_json_experiment_log(args)
+    if not args.resume:
+        create_json_experiment_log(args)
+    print("starting iteration: ", args.start_iter, " total iteration ", num_iterations)
+
 
     with tqdm.tqdm(total=num_iterations) as pbar_epochs:
-        for iteration in range(num_iterations):
+        for iteration in range(args.start_iter, num_iterations):
             opt.zero_grad()
             meta_train_error = 0.0
             meta_train_ber = 0.0

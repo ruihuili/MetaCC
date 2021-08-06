@@ -33,7 +33,7 @@ class ChannelCodingTaskDataset:
         # load the data
         print('Loading data for: ' + self.config, " real data for val? ", args.test_dataset)
         if self.dataset_name == 'train':
-            data = np.load('datasets/train/' + self.config + '_data.npz')
+            data = np.load('datasets/diff_support_query/train/' + self.config + '_data.npz')
             self.images = data['train_images']
             self.labels = data['train_labels']
             print("train shapes", np.shape(self.images), np.shape(self.labels))
@@ -126,31 +126,48 @@ class ChannelCodingTaskDataset:
         """
         prob_aug = 0.5
         dropout2_now = False
+        # print("dataset name ", self.dataset_name)
         # we only use task augmentation during training
         if task_aug == "None" or self.dataset_name != 'train' or np.random.uniform() < prob_aug:
             # we sample one task at a time
             if self.dataset_name == 'train':
+                # print("seed", self.rng.randint(1, 999999))
                 random.seed(self.rng.randint(1, 999999))
                 # pick a random noise setup
                 selected_noise_setup = random.randint(0, self.dims[0] - 1)
             else:
                 # make sure the testing has the same order of tasks across runs
                 random.seed(idx)
+                # print("seed", idx, random.seed(idx))
                 # use the previous ordering of copies
                 selected_noise_setup = idx // self.copies_of_vali_metrics
 
-            selected_classes = random.sample(
+            selected_support_classes = random.sample(
                 range(self.dims[1]), self.num_classes_per_set)
+            selected_query_classes = random.sample(
+                range(self.dims[1]), self.num_classes_per_set)
+
 
             task_images = []
             task_labels = []
-            for current_class in selected_classes:
-                selected_examples = random.sample(
-                    range(self.dims[2]), self.support_samples_per_class + self.target_samples_per_class)
-                task_images.append(
-                    self.images[selected_noise_setup][current_class][selected_examples])
-                task_labels.append(
-                    self.labels[selected_noise_setup][current_class][selected_examples])
+            for idx in range(self.num_classes_per_set):
+
+                selected_supp_examples = random.sample(range(self.dims[2]), self.support_samples_per_class)
+                selected_query_examples = random.sample(range(self.dims[2]), self.target_samples_per_class)
+                class_support = selected_support_classes[idx]
+                class_target = selected_query_classes[idx]
+                # print(type(self.images[selected_noise_setup][class_support][selected_supp_examples]))
+                # print(np.shape(self.images[selected_noise_setup][class_support][selected_query_examples]))
+                combined_images = torch.cat((self.images[selected_noise_setup][class_support][selected_supp_examples], 
+                self.images[selected_noise_setup][class_target][selected_query_examples]), 0)
+                # print(type(combined_images))
+                # print(np.shape(combined_images))
+
+                combined_labels = torch.cat((self.labels[selected_noise_setup][class_support][selected_supp_examples], 
+                self.labels[selected_noise_setup][class_target][selected_query_examples]), 0)
+                task_images.append(combined_images)
+                task_labels.append(combined_labels)
+
         else:
             if task_aug == 'mixup1':
                 # generate two random noise types
