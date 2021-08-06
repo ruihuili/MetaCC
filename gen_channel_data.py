@@ -177,13 +177,13 @@ def corrupt_signal(input_signal, noise_type, sigma, metrics = {}, seed = 0, debu
         if debugging: print("sigb", sigma_bursty)
         awgn = sigma * rng.standard_normal(data_shape)
         bursty_awgn = sigma_bursty * rng.standard_normal(data_shape)
-        bursty_indicator = (rng.random(len(input_signal)) <= p)
+        bursty_indicator = (rng.rand(len(input_signal)) <= p)
         corrupted_signal = 2.0*input_signal-1.0 + awgn + bursty_awgn * bursty_indicator
 
     elif noise_type == "bsc":
         p = metrics["p"]
         corrupted_signal = input_signal.copy()
-        flip_locs = (rng.random(len(input_signal)) <= p)
+        flip_locs = (rng.rand(len(input_signal)) <= p)
         corrupted_signal[flip_locs] = 1 ^ corrupted_signal[flip_locs]
         # print("flip locs", flip_locs )
         # print("corrupted sig", corrupted_signal)
@@ -191,7 +191,7 @@ def corrupt_signal(input_signal, noise_type, sigma, metrics = {}, seed = 0, debu
     elif noise_type == "bec":
         p = metrics["p"]
         corrupted_signal = input_signal.copy()
-        corrupted_signal[rng.random(len(corrupted_signal)) <= p] = -1
+        corrupted_signal[rng.rand(len(corrupted_signal)) <= p] = -1
 
     else:
         print("Undefiled channel ")
