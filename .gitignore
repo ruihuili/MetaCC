@@ -1,0 +1,10 @@
+data/
+results/
+models/
+__pycache__/
+*.cpython-36.pyc
+*.pyc
+*.out
+*.pt
+*.npz
+*.zip
