@@ -33,7 +33,7 @@ class ChannelCodingTaskDataset:
         # load the data
         print('Loading data for: ' + self.config, " real data for val? ", args.test_dataset)
         if self.dataset_name == 'train':
-            data = np.load('datasets/diff_support_query/train/' + self.config + '_data.npz')
+            data = np.load('dataset_v2/train/' + self.config + '_data.npz')
             self.images = data['train_images']
             self.labels = data['train_labels']
             print("train shapes", np.shape(self.images), np.shape(self.labels))
@@ -91,11 +91,8 @@ class ChannelCodingTaskDataset:
             # sys.exit()
 
         else:
-            print("load synth val data ")
-            if 'bursty_easy' in self.config:
-                data = np.load('datasets/test/bursty_easy_test_data.npz')
-            else:
-                data = np.load('datasets/test/test_data.npz')
+            print("load synth val data ")            
+            data = np.load('dataset_v2/test/test_data.npz')
             self.images = data['test_images']
             self.labels = data['test_labels']
             print("val shapes", np.shape(self.images), np.shape(self.labels))
