@@ -141,7 +141,7 @@ def fast_adapt(batch, model, scaling_param, loss, adaptation_steps, shots, ways,
 
 def main(args, device):
     # process the args
-    ways = args.num_classes_per_set
+    ways =  args.ways #args.num_classes_per_set
     shots = args.train_num_samples_per_class
     seed = args.train_seed
     meta_batch_size = args.batch_size
@@ -159,10 +159,12 @@ def main(args, device):
         torch.backends.cudnn.benchmark = True
 
     # specify some details manually - based on L2L implementation
-    meta_lr = 0.001  # 0.003
-    fast_lr = 0.1
-    adaptation_steps = 5
-    num_iterations = 50000
+    meta_lr = args.meta_lr #0.001  # 0.003
+    fast_lr = args.task_lr #0.1 
+    adaptation_steps = args.adapt_steps#5
+
+    print("Meta LR ", meta_lr, " inner loop LR ", fast_lr, " adaptation steps ", adaptation_steps)
+    num_iterations = 200000
     meta_valid_freq = 10000
     save_model_freq = 2000
 
