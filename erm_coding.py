@@ -71,7 +71,7 @@ def comms_bler(y_targ, y_pred):
 
 def fast_adapt(batch, learner, loss, device):
     adaptation_data, adaptation_labels, evaluation_data, evaluation_labels = batch
-    print(adaptation_labels, evaluation_labels)
+    # print(adaptation_labels, evaluation_labels)
     inputs = torch.cat((adaptation_data, evaluation_data))
     labels = torch.cat((adaptation_labels, evaluation_labels))
 
