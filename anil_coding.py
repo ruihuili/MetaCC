@@ -71,18 +71,32 @@ def comms_bler(y_targ, y_pred):
     return bler
 
 
+
 def fast_adapt(batch, learner, features, loss, adaptation_steps, shots, ways, device):
     adaptation_data, adaptation_labels, evaluation_data, evaluation_labels = batch
+
     adaptation_data = features(adaptation_data)
     evaluation_data = features(evaluation_data)
 
+    adaptation_data = torch.squeeze(adaptation_data).permute(0, 2, 1)
+    unflatten_adapt = torch.nn.Unflatten(0, (adaptation_data.shape[0:2]))
+    adaptation_data = torch.flatten(adaptation_data, 0, 1)
+
+    evaluation_data = torch.squeeze(evaluation_data).permute(0, 2, 1)
+    unflatten_eva = torch.nn.Unflatten(0, (evaluation_data.shape[0:2]))
+    evaluation_data = torch.flatten(evaluation_data, 0, 1)
+
     # Adapt the model
     for step in range(adaptation_steps):
-        adaptation_error = loss(learner(adaptation_data), adaptation_labels)
+    
+        output = learner(adaptation_data)
+        output = unflatten_adapt(output).squeeze()
+
+        adaptation_error = loss(output, adaptation_labels)
         learner.adapt(adaptation_error)
 
     # Evaluate the adapted model
-    predictions = learner(evaluation_data)
+    predictions = unflatten_eva(learner(evaluation_data)).squeeze()
     evaluation_error = loss(predictions, evaluation_labels)
 
     evaluation_ber = comms_ber(evaluation_labels, torch.sigmoid(predictions))
@@ -91,12 +105,16 @@ def fast_adapt(batch, learner, features, loss, adaptation_steps, shots, ways, de
     return evaluation_error, evaluation_ber, evaluation_bler
 
 def eva_wo_adapt(batch, learner, features, loss, device):
-    adaptation_data, adaptation_labels, evaluation_data, evaluation_labels = batch
-    adaptation_data = features(adaptation_data)
-    evaluation_data = features(evaluation_data)
+    _, _, evaluation_data, evaluation_labels = batch
 
+    evaluation_data = features(evaluation_data)
+    evaluation_data = torch.squeeze(evaluation_data).permute(0, 2, 1)
+    unflatten_eva = torch.nn.Unflatten(0, (evaluation_data.shape[0:2]))
+    evaluation_data = torch.flatten(evaluation_data, 0, 1)    
     # Evaluate the adapted model
-    predictions = learner(evaluation_data)
+
+    predictions = unflatten_eva(learner(evaluation_data)).squeeze()
+
     evaluation_error = loss(predictions, evaluation_labels)
 
     evaluation_ber = comms_ber(evaluation_labels, torch.sigmoid(predictions))
@@ -142,7 +160,7 @@ def main(args, device):
         args.copies_of_vali_metrics
     # num_val_tasks = len(tasksets.validation.batch_arrange)
 
-    model = CNN4(args.image_height)
+    model = CNN4(args.image_height, hidden_size=args.cnn_filter, layers=args.cnn_layers)
     features = model.features
     features.to(device)
 
@@ -156,7 +174,7 @@ def main(args, device):
 
     create_json_experiment_log(args)
 
-    with tqdm.tqdm(total=num_iterations) as pbar_epochs:
+    with tqdm.tqdm(total=num_iterations, disable=True) as pbar_epochs:
         for iteration in range(num_iterations):
             opt.zero_grad()
             meta_train_error = 0.0

@@ -76,12 +76,25 @@ def fast_adapt(batch, learner, classifier, loss, adaptation_steps, shots, ways, 
 
     # Adapt the model
     for step in range(adaptation_steps):
-        adaptation_error = loss(classifier(learner(
-            adaptation_data)), adaptation_labels)
+        output = learner(adaptation_data)
+
+        output = torch.squeeze(output).permute(0, 2, 1)
+        unflatten_adapt = torch.nn.Unflatten(0, (output.shape[0:2]))
+        output = torch.flatten(output, 0, 1)
+        output = classifier(output)
+        output = unflatten_adapt(output).squeeze()
+
+        adaptation_error = loss(output, adaptation_labels)
         learner.adapt(adaptation_error)
 
     # Evaluate the adapted model
-    predictions = classifier(learner(evaluation_data))
+    output = learner(evaluation_data)
+    output = torch.squeeze(output).permute(0, 2, 1)
+    unflatten_adapt = torch.nn.Unflatten(0, (output.shape[0:2]))
+    output = torch.flatten(output, 0, 1)
+    output = classifier(output)
+    predictions = unflatten_adapt(output).squeeze()
+    
     evaluation_error = loss(predictions, evaluation_labels)
 
     evaluation_ber = comms_ber(evaluation_labels, torch.sigmoid(predictions))
@@ -93,7 +106,13 @@ def eva_wo_adapt(batch, learner, classifier, loss, device):
     adaptation_data, adaptation_labels, evaluation_data, evaluation_labels = batch
 
     # Evaluate the adapted model
-    predictions = classifier(learner(evaluation_data))
+    output = learner(evaluation_data)
+    output = torch.squeeze(output).permute(0, 2, 1)
+    unflatten_adapt = torch.nn.Unflatten(0, (output.shape[0:2]))
+    output = torch.flatten(output, 0, 1)
+    output = classifier(output)
+    predictions = unflatten_adapt(output).squeeze()
+    
     evaluation_error = loss(predictions, evaluation_labels)
 
     evaluation_ber = comms_ber(evaluation_labels, torch.sigmoid(predictions))
@@ -152,7 +171,7 @@ def main(args, device):
 
     create_json_experiment_log(args)
 
-    with tqdm.tqdm(total=num_iterations) as pbar_epochs:
+    with tqdm.tqdm(total=num_iterations, disable=True) as pbar_epochs:
         for iteration in range(num_iterations):
             opt.zero_grad()
             meta_train_error = 0.0

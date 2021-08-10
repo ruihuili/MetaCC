@@ -77,9 +77,21 @@ def fast_adapt(batch, features, classifier, update, diff_sgd, loss, adaptation_s
     adaptation_data = features(adaptation_data)
     evaluation_data = features(evaluation_data)
 
+    adaptation_data = torch.squeeze(adaptation_data).permute(0, 2, 1)
+    unflatten_adapt = torch.nn.Unflatten(0, (adaptation_data.shape[0:2]))
+    adaptation_data = torch.flatten(adaptation_data, 0, 1)
+
+    evaluation_data = torch.squeeze(evaluation_data).permute(0, 2, 1)
+    unflatten_eva = torch.nn.Unflatten(0, (evaluation_data.shape[0:2]))
+    evaluation_data = torch.flatten(evaluation_data, 0, 1)
+
     # Adapt the model & learned update
     for step in range(adaptation_steps):
-        adaptation_error = loss(classifier(adaptation_data), adaptation_labels)
+        output = classifier(adaptation_data)
+        # print("after classifier",  adaptation_data.shape)
+        output = unflatten_adapt(output).squeeze()
+
+        adaptation_error = loss(output, adaptation_labels)
         if step > 0:  # Update the learnable update function
             update_grad = torch.autograd.grad(adaptation_error,
                                               update.parameters(),
@@ -93,7 +105,7 @@ def fast_adapt(batch, features, classifier, update, diff_sgd, loss, adaptation_s
         diff_sgd(classifier, classifier_updates)
 
     # Evaluate the adapted model
-    predictions = classifier(evaluation_data)
+    predictions = unflatten_eva(classifier(evaluation_data)).squeeze()
     evaluation_error = loss(predictions, evaluation_labels)
 
     evaluation_ber = comms_ber(evaluation_labels, torch.sigmoid(predictions))
@@ -102,12 +114,16 @@ def fast_adapt(batch, features, classifier, update, diff_sgd, loss, adaptation_s
     return evaluation_error, evaluation_ber, evaluation_bler
 
 def eva_wo_adapt(batch, features, classifier, update, diff_sgd, loss, device):
-    adaptation_data, adaptation_labels, evaluation_data, evaluation_labels = batch
-    adaptation_data = features(adaptation_data)
+    _, _, evaluation_data, evaluation_labels = batch
+    
     evaluation_data = features(evaluation_data)
 
+    evaluation_data = torch.squeeze(evaluation_data).permute(0, 2, 1)
+    unflatten_eva = torch.nn.Unflatten(0, (evaluation_data.shape[0:2]))
+    evaluation_data = torch.flatten(evaluation_data, 0, 1)
+
     # Evaluate the adapted model
-    predictions = classifier(evaluation_data)
+    predictions = unflatten_eva(classifier(evaluation_data)).squeeze()
     evaluation_error = loss(predictions, evaluation_labels)
 
     evaluation_ber = comms_ber(evaluation_labels, torch.sigmoid(predictions))
@@ -117,7 +133,7 @@ def eva_wo_adapt(batch, features, classifier, update, diff_sgd, loss, device):
 
 def main(args, device):
     # process the args
-    ways = args.num_classes_per_set
+    ways = args.ways #args.num_classes_per_set
     shots = args.train_num_samples_per_class
     seed = args.train_seed
     meta_batch_size = args.batch_size
@@ -135,10 +151,12 @@ def main(args, device):
         torch.backends.cudnn.benchmark = True
 
     # specify some details manually - based on L2L implementation
-    meta_lr = 0.001  # 0.003
-    fast_lr = 0.1
-    adaptation_steps = 5
-    num_iterations = 50000
+    meta_lr = args.meta_lr #0.001  # 0.003
+    fast_lr = args.task_lr #0.1 
+    adaptation_steps = args.adapt_steps#5
+
+    print("Meta LR ", meta_lr, " inner loop LR ", fast_lr, " adaptation steps ", adaptation_steps)
+    num_iterations = 200000
     meta_valid_freq = 10000
     save_model_freq = 2000
 
@@ -170,7 +188,7 @@ def main(args, device):
 
     create_json_experiment_log(args)
 
-    with tqdm.tqdm(total=num_iterations) as pbar_epochs:
+    with tqdm.tqdm(total=num_iterations, disable=True) as pbar_epochs:
         for iteration in range(num_iterations):
             opt.zero_grad()
             meta_train_error = 0.0
@@ -185,6 +203,16 @@ def main(args, device):
                 task_classifier = l2l.clone_module(classifier)
                 task_update = l2l.clone_module(fast_update)
                 batch = tasksets.train.sample(task_aug=args.task_aug)
+
+                eva_0shot_error, eva_0shot_ber, eva_0shot_bler = eva_wo_adapt(batch,
+                                                                                   task_features,
+                                                                                   task_classifier,
+                                                                                   task_update,
+                                                                                   diff_sgd,
+                                                                                   loss,
+                                                                                   device)
+
+
                 evaluation_error, evaluation_ber, evaluation_bler = fast_adapt(batch,
                                                                                task_features,
                                                                                task_classifier,

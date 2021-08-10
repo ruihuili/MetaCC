@@ -169,7 +169,7 @@ def main(args, device):
         create_json_experiment_log(args)
     print("starting iteration: ", args.start_iter, " total iteration ", num_iterations)
 
-    with tqdm.tqdm(total=num_iterations) as pbar_epochs:
+    with tqdm.tqdm(total=num_iterations, disable=True) as pbar_epochs:
         for iteration in range(args.start_iter, num_iterations):
             opt.zero_grad()
             # for p in model.parameters():
