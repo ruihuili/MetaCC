@@ -146,15 +146,35 @@ def main(args, device):
         
     model = CNN4(args.image_height, hidden_size=args.cnn_filter, layers=args.cnn_layers )
     model = model.to(device)
-    maml = l2l.algorithms.MAML(model, lr=fast_lr, first_order=False)
+
+    if "maml" in args.meta_learner.lower():
+        print("Using maml as learner ", args.meta_learner.lower())
+        meta_learner = l2l.algorithms.MAML(model, lr=fast_lr, first_order=args.first_order)
+    elif "metacurv" in args.meta_learner.lower():
+        print("Using MetaCurvature as learner ", args.meta_learner.lower())
+        from learn2learn.optim.transforms import MetaCurvatureTransform  
+        meta_learner = l2l.algorithms.GBML(
+        model,
+        transform=MetaCurvatureTransform,
+        lr=fast_lr,
+        adapt_transform=False
+    )
+        meta_learner = meta_learner.to(device)
+    elif "metasgd" in args.meta_learner.lower():
+        print("Using MetaSGD as learner ", args.meta_learner.lower())
+        meta_learner = l2l.algorithms.MetaSGD(model, lr=fast_lr, first_order=args.first_order, lrs=None)
+    else:
+        print("undefined meta-learner ", args.meta_learner)
+        import sys 
+        sys.exit()
 
     if args.resume:
         print("resuming run and loading model from ",  os.path.join('models/', args.name + "_" + str(args.start_iter) + '.pt'))
         model_path = os.path.join('models/', args.name + "_" + str(args.start_iter) + '.pt')#('edin_models_final', args.name) + '_49999.pt'
         print("model path loading from ", model_path)
-        maml.load_state_dict(torch.load(model_path))
+        meta_learner.load_state_dict(torch.load(model_path))
     
-    opt = optim.Adam(maml.parameters(), meta_lr)
+    opt = optim.Adam(meta_learner.parameters(), meta_lr)
     loss = nn.BCEWithLogitsLoss()
 
     if not args.resume:
@@ -173,7 +193,7 @@ def main(args, device):
 
             for task in range(meta_batch_size):
                 # Compute meta-training loss
-                learner = maml.clone()
+                learner = meta_learner.clone()
                 batch = tasksets.train.sample(task_aug=args.task_aug)
                 evaluation_error, evaluation_ber, evaluation_bler = fast_adapt(batch,
                                                                                learner,
@@ -190,7 +210,7 @@ def main(args, device):
                 meta_train_bler_list.append(evaluation_bler.item())
 
             # Average the accumulated gradients and optimize
-            for p in maml.parameters():
+            for p in meta_learner.parameters():
                 p.grad.data.mul_(1.0 / meta_batch_size)
             opt.step()
             # Print the metrics to tqdm panel
@@ -210,7 +230,7 @@ def main(args, device):
 
                 for task in range(num_val_tasks):
                     # Compute meta-validation loss
-                    learner = maml.clone()
+                    learner = meta_learner.clone()
                     batch = tasksets.validation.sample(task)
                     evaluation_error, evaluation_ber, evaluation_bler = fast_adapt(batch,
                                                                                    learner,
@@ -258,7 +278,7 @@ def main(args, device):
                 meta_0shot_ber_list = []
                 meta_0shot_bler_list = []
                 for task in range(num_val_tasks):
-                    learner = maml.clone()
+                    learner = meta_learner.clone()
                     batch = tasksets.validation.sample(task)
                     eva_0shot_error, eva_0shot_ber, eva_0shot_bler = eva_wo_adapt(batch,
                                                                                    learner,
@@ -289,7 +309,7 @@ def main(args, device):
                 # -------------------------zeroshot-----------------------------
 
             if iteration % save_model_freq == (save_model_freq - 1):
-                torch.save(maml.state_dict(), f=os.path.join('models', args.name + "_" + str(iteration) + ".pt"))
+                torch.save(meta_learner.state_dict(), f=os.path.join('models', args.name + "_" + str(iteration) + ".pt"))
             pbar_epochs.update(1)
 
     total_time = time.time() - time_start
