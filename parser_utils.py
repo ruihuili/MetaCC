@@ -42,7 +42,7 @@ def get_args():
     parser.add_argument('--task_learning_rate', type=float, default=0.1, help='Learning rate per task gradient step')
     parser.add_argument('--meta_lr', type=float, default=0.001, help='Learning rate of overall MAML system')
     parser.add_argument('--task_lr', type=float, default=0.1, help='Learning rate per task gradient step')
-    parser.add_argument('--adapt_steps', type=int, default=5, help='Number of inner loop adaptation steps')
+    parser.add_argument('--adapt_steps', type=int, default=2, help='Number of inner loop adaptation steps')
     parser.add_argument('--first_order', action='store_true', default=False, help='First order MAML')
     parser.add_argument('--vali_every_n_ep', type=int, default=20, help='Validate model every n epochs')
     parser.add_argument('--copies_of_vali_metrics', type=int, default=50, help='Copies of the validation metrics in one validation')
