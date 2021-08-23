@@ -26,7 +26,7 @@ def cosine_distances_logits(a, b):
     a = normalize(a)
     b = normalize(b)
     # to get the logits we have minus and minus, so plus
-    return torch.mm(a, b.t())
+    return torch.mm(a.reshape(a.shape[0], -1), b.reshape(b.shape[0], -1).t())
 
 
 def create_json_experiment_log(args):
@@ -65,7 +65,6 @@ def comms_ber(y_targ, y_pred):
     num_unequal = np.not_equal(
         np.round(y_targ), np.round(y_pred)).astype('float64')
     ber = sum(sum(num_unequal)) * 1.0 / (np.size(y_targ))
-
     return ber
 
 
@@ -181,7 +180,7 @@ def main(args, device):
     adaptation_steps = args.adapt_steps#5
 
     print("Meta LR ", meta_lr, " inner loop LR ", fast_lr, " adaptation steps ", adaptation_steps)
-    num_iterations = 200000
+    num_iterations = 80000
     meta_valid_freq = 10000
     save_model_freq = 2000
 
