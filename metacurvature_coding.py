@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import json
+from utils import create_json_experiment_log, update_json_experiment_log_dict, comms_ber, comms_bler
 import os
 import random
 import time
@@ -156,7 +156,7 @@ def main(args, device):
 
     create_json_experiment_log(args)
 
-    with tqdm.tqdm(total=num_iterations) as pbar_epochs:
+    with tqdm.tqdm(total=num_iterations, disable=args.disable_tqdm) as pbar_epochs:
         for iteration in range(num_iterations):
             opt.zero_grad()
             meta_train_error = 0.0

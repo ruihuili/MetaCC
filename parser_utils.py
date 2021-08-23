@@ -78,6 +78,8 @@ def get_args():
     parser.add_argument('--task_aug', type=str, default="None")
     parser.add_argument('--start_iter', type=int, default=0, help='starting an experiment at step')
     parser.add_argument('--resume', action='store_true', default=False, help='resuming an experiment, use in conjunction with start_iter')
+    parser.add_argument('--eval_only', action='store_true', default=False, help='Eval only')
+    parser.add_argument('--disable_tqdm', action='store_true', default=True, help='Show progress bar')
     parser.add_argument('--save_adapt_acts', type=str, default="None")
     parser.add_argument('--test_dataset', type=str, default="synth")
     parser.add_argument('--tb_depth', type=int, default=2, help="viterbi param. indicating memory length")

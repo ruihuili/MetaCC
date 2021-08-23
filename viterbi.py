@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import json
+from utils import create_json_experiment_log, update_json_experiment_log_dict
 import os
 import random
 import time
@@ -19,39 +19,7 @@ from functools import partial
 import pickle
 
 
-def create_json_experiment_log(args):
-    json_experiment_log_file_name = os.path.join(
-        'results/test', args.name) + '.json'
-    experiment_summary_dict = {'val_error': [], 'val_ber': [], 'val_bler': [],
-                               'train_error': [], 'train_ber': [], 'train_bler': [],
-                               'total_time': [], 'total_val_time': [], 'iter': [],
-                               'train_ber_list': [], 'train_bler_list': [],
-                               'val_ber_list': [], 'val_bler_list': [],
-                               'train_ber_std': [], 'train_bler_std': [],
-                               'val_ber_std': [], 'val_bler_std': [],
-                               }
-
-    with open(json_experiment_log_file_name, 'w') as f:
-        json.dump(experiment_summary_dict, fp=f)
-
-
-def update_json_experiment_log_dict(experiment_update_dict, args):
-    json_experiment_log_file_name = os.path.join(
-        'results/test', args.name) + '.json'
-    with open(json_experiment_log_file_name, 'r') as f:
-        summary_dict = json.load(fp=f)
-
-    for key in experiment_update_dict:
-        summary_dict[key].append(experiment_update_dict[key])
-
-    with open(json_experiment_log_file_name, 'w') as f:
-        json.dump(summary_dict, fp=f)
-
-
 def comms_ber(y_targ, y_pred):
-    # y_targ = y_targ.cpu().detach().numpy()
-    # y_pred = y_pred.cpu().detach().numpy()
-
     num_unequal = np.not_equal(
         np.round(y_targ), np.round(y_pred)).astype('float64')
     ber = sum(sum(num_unequal)) * 1.0 / (np.size(y_targ))
@@ -60,8 +28,6 @@ def comms_ber(y_targ, y_pred):
 
 
 def comms_bler(y_targ, y_pred):
-    # y_targ = y_targ.cpu().detach().numpy()
-    # y_pred = y_pred.cpu().detach().numpy()
     y_pred = np.round(y_pred)
 
     tp0 = abs(y_targ - y_pred)
@@ -70,31 +36,10 @@ def comms_bler(y_targ, y_pred):
 
     return bler
 
-def append_activation(acts, name, mod, inp, out):
-    acts[name].append(out.cpu())
-
-def fast_adapt(batch, learner, loss, adaptation_steps, shots, ways, device, acts):
-    adaptation_data, adaptation_labels, evaluation_data, evaluation_labels = batch
-
-
-     
-
-    predictions = adapted_learner(evaluation_data)
-
-    for handle in handles: handle.remove()
-    evaluation_error = loss(predictions, evaluation_labels)
-
-    evaluation_ber = comms_ber(evaluation_labels, torch.sigmoid(predictions))
-    evaluation_bler = comms_bler(evaluation_labels, torch.sigmoid(predictions))
-
-    return evaluation_error, evaluation_ber, evaluation_bler, acts
-
-
 
 def main(args, device):
     # process the args
-    ways = args.num_classes_per_set
-    shots = args.train_num_samples_per_class
+    
     seed = args.train_seed
     meta_batch_size = args.batch_size
 
@@ -123,7 +68,10 @@ def main(args, device):
         args.copies_of_vali_metrics
 
 
-    create_json_experiment_log(args)
+    f_name = os.path.join('results/test/', args.test_dataset, args.name) + '.json'
+
+
+    create_json_experiment_log(f_name)
 
     val_time_start = time.time()
     meta_valid_error = 0.0
@@ -186,12 +134,12 @@ def main(args, device):
                                 'val_bler_std': np.std(meta_valid_bler_list),
                                 # 'iter': iteration + 1
                                 }
-    update_json_experiment_log_dict(experiment_update_dict, args)
+    update_json_experiment_log_dict(experiment_update_dict, f_name)
     total_val_time += time.time() - val_time_start
 
     experiment_update_dict = {
         'total_time': 0, 'total_val_time': total_val_time}
-    update_json_experiment_log_dict(experiment_update_dict, args)
+    update_json_experiment_log_dict(experiment_update_dict, f_name)
 
 
 if __name__ == '__main__':
