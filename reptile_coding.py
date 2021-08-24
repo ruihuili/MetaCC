@@ -98,21 +98,26 @@ def main(args, device):
         model_path = os.path.join('models/', args.name + "_" + str(args.start_iter) + '.pt')#('edin_models_final', args.name) + '_49999.pt'
         print("model path loading from ", model_path)
 
-        model.load_state_dict(torch.load(model_path))
+        [loaded_model_states, loaded_opt_state] = torch.load(model_path)
+        model.load_state_dict(loaded_model_states)
     elif args.eval_only:
         model_path = os.path.join('models/', args.name + '_49999.pt')
         print("evaluation only, loading model from ", model_path)
-        model.load_state_dict(torch.load(model_path))
+        [loaded_model_states, adapt_opt_state] = torch.load(model_path)
+        model.load_state_dict(loaded_model_states)
+
 
     # opt = optim.Adam(model.parameters(), meta_lr)
-    # opt = optim.Adam(model.parameters(), meta_lr, betas=(meta_mom, 0.999))
-    opt = optim.SGD(model.parameters(), lr=meta_lr, momentum=meta_mom)
+    opt = optim.Adam(model.parameters(), meta_lr, betas=(meta_mom, 0.999))
+    # opt = optim.SGD(model.parameters(), lr=meta_lr, momentum=meta_mom)
 
     loss = nn.BCEWithLogitsLoss()
 
     adapt_opt = optim.Adam(model.parameters(), lr=fast_lr)
-    adapt_opt_state = adapt_opt.state_dict()
 
+    if not args.resume or args.eval_only:
+        adapt_opt_state = adapt_opt.state_dict()
+    
     if args.eval_only:
         f_name = os.path.join('results/test/', args.test_dataset, args.name) + '.json'
     else:
@@ -125,7 +130,6 @@ def main(args, device):
     with tqdm.tqdm(total=num_iterations, disable=args.disable_tqdm) as pbar_epochs:
         for iteration in range(num_iterations):
             # opt.zero_grad()
-            
             frac_done = float(iteration) / num_iterations
             new_lr = frac_done * meta_lr + (1 - frac_done) * meta_lr
             for pg in opt.param_groups:
@@ -148,7 +152,6 @@ def main(args, device):
                                     lr=fast_lr,
                                     betas=(0, 0.999))
                     adapt_opt.load_state_dict(adapt_opt_state)
-
                     batch = tasksets.train.sample(task_aug=args.task_aug)
                     evaluation_error, evaluation_ber, evaluation_bler = fast_adapt(batch,
                                                                                 learner,
@@ -274,7 +277,7 @@ def main(args, device):
                 if args.eval_only: exit()
 
             if iteration % save_model_freq == (save_model_freq - 1):
-                torch.save(model.state_dict(), f=os.path.join('models', args.name +"_" +str(iteration)+ ".pt"))
+                torch.save([model.state_dict(), adapt_opt_state], f=os.path.join('models', args.name +"_" +str(iteration)+ ".pt"))
             pbar_epochs.update(1)
 
     total_time = time.time() - time_start
