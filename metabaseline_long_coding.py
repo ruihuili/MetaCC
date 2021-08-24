@@ -266,7 +266,7 @@ def main(args, device):
     scaling_param = nn.Parameter(torch.tensor(10.0, device=device))
     scaling_opt = optim.Adam([scaling_param], meta_lr)
 
-    with tqdm.tqdm(total=2*num_iterations, initial=num_iterations, disable=args.disable_tqdm) as pbar_epochs:
+    with tqdm.tqdm(total=2*num_iterations, initial=num_iterations) as pbar_epochs:
         for iteration in range(num_iterations):
             opt.zero_grad()
             scaling_opt.zero_grad()
@@ -327,7 +327,10 @@ def main(args, device):
                                                                                    shots,
                                                                                    ways,
                                                                                    device)
-                    meta_valid_error += evaluation_error.item()
+
+                    if type(evaluation_error) != int:
+                        meta_valid_error += evaluation_error.item()
+
                     meta_valid_ber += evaluation_ber.item()
                     meta_valid_bler += evaluation_bler.item()
                     meta_valid_ber_list.append(evaluation_ber.item())

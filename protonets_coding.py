@@ -273,7 +273,8 @@ def main(args, device):
                                                                                    shots,
                                                                                    ways,
                                                                                    device)
-                    meta_valid_error += evaluation_error.item()
+                    if type(evaluation_error) != int:
+                        meta_valid_error += evaluation_error.item()
                     meta_valid_ber += evaluation_ber.item()
                     meta_valid_bler += evaluation_bler.item()
                     meta_valid_ber_list.append(evaluation_ber.item())
