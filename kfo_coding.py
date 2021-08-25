@@ -13,8 +13,8 @@ from torch import nn, optim
 
 from datasets import get_tasksets
 from models import CNN4
-from parser_utils import get_args
-from utils import create_json_experiment_log, update_json_experiment_log_dict, comms_ber, comms_bler
+from utils.args_parser import get_args
+from utils.utils import create_json_experiment_log, update_json_experiment_log_dict, comms_ber, comms_bler
 
 
 def fast_adapt(batch, features, classifier, update, diff_sgd, loss, adaptation_steps,

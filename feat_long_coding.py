@@ -14,7 +14,7 @@ from torch import nn, optim
 from datasets import get_tasksets
 from models import CNN4
 from feat import FEAT
-from parser_utils import get_args
+from utils.args_parser import get_args
 
 
 def create_json_experiment_log(args):

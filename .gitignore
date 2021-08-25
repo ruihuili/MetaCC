@@ -1,5 +1,6 @@
 data/
-results/
+dataset_*
+results*/
 models/
 __pycache__/
 *.cpython-36.pyc
@@ -8,3 +9,5 @@ __pycache__/
 *.pt
 *.npz
 *.zip
+*.sh
+*.pickle

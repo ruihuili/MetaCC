@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from utils import create_json_experiment_log, update_json_experiment_log_dict, comms_ber, comms_bler
+from utils.utils import create_json_experiment_log, update_json_experiment_log_dict, comms_ber, comms_bler
 import os
 import random
 import time
@@ -14,7 +14,7 @@ from torch import nn, optim
 
 from datasets import get_tasksets
 from models import CNN4
-from parser_utils import get_args
+from utils.args_parser import get_args
 
 
 def create_json_experiment_log(args):

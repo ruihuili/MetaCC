@@ -12,10 +12,10 @@ from torch import nn, optim
 
 from datasets import get_tasksets
 from models import CondConvNet
-from parser_utils import get_args
+from utils.args_parser import get_args
 
 from cavia_algo import CAVIA
-from utils import create_json_experiment_log, update_json_experiment_log_dict, comms_ber, comms_bler
+from utils.utils import create_json_experiment_log, update_json_experiment_log_dict, comms_ber, comms_bler
 
 
 def fast_adapt(batch, learner, loss, adaptation_steps, shots, ways, fast_lr, device):

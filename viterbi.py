@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from utils import create_json_experiment_log, update_json_experiment_log_dict
+from utils.utils import create_json_experiment_log, update_json_experiment_log_dict
 import os
 import random
 import time
@@ -12,7 +12,7 @@ import tqdm
 import commpy.channelcoding.convcode as cc
 
 from datasets import get_tasksets
-from parser_utils import get_args
+from utils.args_parser import get_args
 
 import collections
 from functools import partial

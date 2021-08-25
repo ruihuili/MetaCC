@@ -12,16 +12,13 @@ from torch import nn, optim
 
 from datasets import get_tasksets
 from models import CNN4
-from parser_utils import get_args
-from utils import create_json_experiment_log, update_json_experiment_log_dict, comms_ber, comms_bler
+from utils.args_parser import get_args
+from utils.utils import create_json_experiment_log, update_json_experiment_log_dict, comms_ber, comms_bler
 
 
 def fast_adapt(batch, learner, loss, adaptation_steps, shots, ways, device):
     adaptation_data, adaptation_labels, evaluation_data, evaluation_labels = batch
 
-    # print("adaptation_labels ", adaptation_labels[0])
-    # print("evaluation_labels ", evaluation_labels[0])
-    # exit()
     # Adapt the model
     for step in range(adaptation_steps):
         adaptation_error = loss(learner(adaptation_data), adaptation_labels)
@@ -85,8 +82,6 @@ def main(args, device):
 
     num_val_tasks = tasksets.validation.images.shape[0] * \
         args.copies_of_vali_metrics
-    # num_val_tasks = len(tasksets.validation.batch_arrange)
-    # print("!!!!!!!!!!!!!filter size", args.cnn_filter, " layers ", args.cnn_layers)
         
     model = CNN4(args.image_height, hidden_size=args.cnn_filter, layers=args.cnn_layers )
     model = model.to(device)
