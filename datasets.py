@@ -71,6 +71,14 @@ class ChannelCodingTaskDataset:
                 print("loading real data for val/test from datasets/DataIn_64_v1.mat")
                 self.labels = sio.loadmat("datasets/DataIn_64_v1.mat")['DataIn']
                 self.images = sio.loadmat("datasets/DataOut_64_v1.mat")['DataOut']
+            elif args.test_dataset == "realdata64_v3":
+                print("loading real data for val/test from datasets/DataIn_0.40_0.10.mat")
+                self.labels = sio.loadmat("datasets/DataIn_0.40_0.10.mat")['DataIn']
+                self.images = sio.loadmat("datasets/DataOut_0.40_0.10.mat")['DataOut']
+
+                self.labels = np.transpose(self.labels, (1, 2, 0))
+                self.images = np.transpose(self.images, (2, 3, 1, 0))
+
             else:
                 print("real data set undefined. EXIT")
                 import sys
