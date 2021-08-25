@@ -4,7 +4,7 @@ from collections import namedtuple
 import numpy as np
 import torch
 
-from gen_channel_data import *
+from . import gen_channel_data
 
 
 class ChannelCodingTaskDataset:

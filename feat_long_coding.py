@@ -11,8 +11,8 @@ import torch
 import tqdm
 from torch import nn, optim
 
-from datasets import get_tasksets
-from models import CNN4
+from data_utils.datasets import get_tasksets
+from models.models import CNN4
 from feat import FEAT
 from utils.args_parser import get_args
 

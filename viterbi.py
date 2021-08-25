@@ -11,7 +11,7 @@ import torch
 import tqdm
 import commpy.channelcoding.convcode as cc
 
-from datasets import get_tasksets
+from data_utils.datasets import get_tasksets
 from utils.args_parser import get_args
 
 import collections

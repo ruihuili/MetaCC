@@ -11,8 +11,8 @@ import torch
 import tqdm
 from torch import nn, optim
 
-from datasets import get_tasksets
-from models import CNN4
+from data_utils.datasets import get_tasksets
+from models.models import CNN4
 from utils.args_parser import get_args
 
 
@@ -145,8 +145,8 @@ def main(args, device):
     msgd =  l2l.algorithms.MetaSGD(model, lr=fast_lr, first_order=False, lrs=None)
 
     if args.resume:
-        print("resuming run and loading model from ",  os.path.join('models/', args.name + "_" + str(args.start_iter) + '.pt'))
-        model_path = os.path.join('models/', args.name + "_" + str(args.start_iter) + '.pt')#('edin_models_final', args.name) + '_49999.pt'
+        print("resuming run and loading model from ",  os.path.join('saved_models/', args.name + "_" + str(args.start_iter) + '.pt'))
+        model_path = os.path.join('saved_models/', args.name + "_" + str(args.start_iter) + '.pt')#('edin_models_final', args.name) + '_49999.pt'
         print("model path loading from ", model_path)
         msgd.load_state_dict(torch.load(model_path))
     

@@ -12,8 +12,8 @@ import tqdm
 from learn2learn.optim.transforms import MetaCurvatureTransform
 from torch import nn, optim
 
-from datasets import get_tasksets
-from models import CNN4
+from data_utils.datasets import get_tasksets
+from models.models import CNN4
 from utils.args_parser import get_args
 
 

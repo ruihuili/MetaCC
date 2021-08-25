@@ -315,7 +315,7 @@ class CNN4Encoder(torch.nn.Module):
         )
         self.features = torch.nn.Sequential(
             base,
-            l2l.nn.Flatten(),
+            # l2l.nn.Flatten(),
         )
 
     def forward(self, x):

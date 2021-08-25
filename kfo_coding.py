@@ -11,8 +11,8 @@ import torch
 import tqdm
 from torch import nn, optim
 
-from datasets import get_tasksets
-from models import CNN4
+from data_utils.datasets import get_tasksets
+from models.models import CNN4
 from utils.args_parser import get_args
 from utils.utils import create_json_experiment_log, update_json_experiment_log_dict, comms_ber, comms_bler
 
@@ -128,8 +128,8 @@ def main(args, device):
     fast_update.to(device)
 
     if args.resume:
-        print("resuming run and loading model from ",  os.path.join('models/', args.name + "_" + str(args.start_iter) + '.pt'))
-        model_path = os.path.join('models/', args.name + "_" + str(args.start_iter) + '.pt')#('edin_models_final', args.name) + '_49999.pt'
+        print("resuming run and loading model from ",  os.path.join('saved_models/', args.name + "_" + str(args.start_iter) + '.pt'))
+        model_path = os.path.join('saved_models/', args.name + "_" + str(args.start_iter) + '.pt')#('edin_models_final', args.name) + '_49999.pt'
         print("model path loading from ", model_path)
 
         load_dict = torch.load(model_path)
@@ -137,7 +137,7 @@ def main(args, device):
         fast_update.load_state_dict(load_dict['fast_update'])
 
     elif args.eval_only:
-        model_path = os.path.join('models/', args.name + '_49999.pt')
+        model_path = os.path.join('saved_models/', args.name + '_49999.pt')
         print("evaluation only, loading model from ", model_path)
         load_dict = torch.load(model_path)
         model.load_state_dict(load_dict['model'])
