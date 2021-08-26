@@ -16,30 +16,31 @@ from utils.args_parser import get_args
 from utils.utils import create_json_experiment_log, update_json_experiment_log_dict, comms_ber, comms_bler
 
 
-def fast_adapt(batch, learner, classifier, loss, adaptation_steps, shots, ways, device):
+def fast_adapt(batch, learner, features, loss, adaptation_steps, shots, ways, device):
     adaptation_data, adaptation_labels, evaluation_data, evaluation_labels = batch
+
+    adaptation_data = features(adaptation_data)
+    evaluation_data = features(evaluation_data)
+
+    adaptation_data = torch.squeeze(adaptation_data).permute(0, 2, 1)
+    unflatten_adapt = torch.nn.Unflatten(0, (adaptation_data.shape[0:2]))
+    adaptation_data = torch.flatten(adaptation_data, 0, 1)
+
+    evaluation_data = torch.squeeze(evaluation_data).permute(0, 2, 1)
+    unflatten_eva = torch.nn.Unflatten(0, (evaluation_data.shape[0:2]))
+    evaluation_data = torch.flatten(evaluation_data, 0, 1)
 
     # Adapt the model
     for step in range(adaptation_steps):
+    
         output = learner(adaptation_data)
-
-        output = torch.squeeze(output).permute(0, 2, 1)
-        unflatten_adapt = torch.nn.Unflatten(0, (output.shape[0:2]))
-        output = torch.flatten(output, 0, 1)
-        output = classifier(output)
         output = unflatten_adapt(output).squeeze()
 
         adaptation_error = loss(output, adaptation_labels)
         learner.adapt(adaptation_error)
 
     # Evaluate the adapted model
-    output = learner(evaluation_data)
-    output = torch.squeeze(output).permute(0, 2, 1)
-    unflatten_adapt = torch.nn.Unflatten(0, (output.shape[0:2]))
-    output = torch.flatten(output, 0, 1)
-    output = classifier(output)
-    predictions = unflatten_adapt(output).squeeze()
-    
+    predictions = unflatten_eva(learner(evaluation_data)).squeeze()
     evaluation_error = loss(predictions, evaluation_labels)
 
     evaluation_ber = comms_ber(evaluation_labels, torch.sigmoid(predictions))
@@ -47,17 +48,17 @@ def fast_adapt(batch, learner, classifier, loss, adaptation_steps, shots, ways, 
 
     return evaluation_error, evaluation_ber, evaluation_bler
 
-def eva_wo_adapt(batch, learner, classifier, loss, device):
-    adaptation_data, adaptation_labels, evaluation_data, evaluation_labels = batch
+def eva_wo_adapt(batch, learner, features, loss, device):
+    _, _, evaluation_data, evaluation_labels = batch
 
+    evaluation_data = features(evaluation_data)
+    evaluation_data = torch.squeeze(evaluation_data).permute(0, 2, 1)
+    unflatten_eva = torch.nn.Unflatten(0, (evaluation_data.shape[0:2]))
+    evaluation_data = torch.flatten(evaluation_data, 0, 1)    
     # Evaluate the adapted model
-    output = learner(evaluation_data)
-    output = torch.squeeze(output).permute(0, 2, 1)
-    unflatten_adapt = torch.nn.Unflatten(0, (output.shape[0:2]))
-    output = torch.flatten(output, 0, 1)
-    output = classifier(output)
-    predictions = unflatten_adapt(output).squeeze()
-    
+
+    predictions = unflatten_eva(learner(evaluation_data)).squeeze()
+
     evaluation_error = loss(predictions, evaluation_labels)
 
     evaluation_ber = comms_ber(evaluation_labels, torch.sigmoid(predictions))
@@ -105,33 +106,33 @@ def main(args, device):
         args.copies_of_vali_metrics
     # num_val_tasks = len(tasksets.validation.batch_arrange)
 
-    model = CNN4(args.image_height)
+    model = CNN4(args.image_height, hidden_size=args.cnn_filter, layers=args.cnn_layers)
     features = model.features
     features.to(device)
-    classifier = model.classifier
-    classifier.to(device)
-    features = l2l.algorithms.MAML(features, lr=fast_lr)
 
-    all_parameters = list(list(features.parameters()) + list(classifier.parameters()))
-    
+    classifier = model.classifier
+    classifier = l2l.algorithms.MAML(classifier, lr=fast_lr)
+    classifier.to(device)
+
+    all_parameters = list(features.parameters()) + list(classifier.parameters())
+    opt = torch.optim.Adam(all_parameters, meta_lr)
+    loss = nn.BCEWithLogitsLoss()
+
     if args.resume:
         print("resuming run and loading model from ",  os.path.join('saved_models/', args.name + "_" + str(args.start_iter) + '.pt'))
         model_path = os.path.join('saved_models/', args.name + "_" + str(args.start_iter) + '.pt')#('edin_models_final', args.name) + '_49999.pt'
         print("model path loading from ", model_path)
         load_dict = torch.load(model_path)
-        features.load_state_dict(load_dict['features'])
         classifier.load_state_dict(load_dict['classifier'])
-    
+        features.load_state_dict(load_dict['features'])
     elif args.eval_only:
         model_path = os.path.join('saved_models/', args.name + '_49999.pt')
         print("evaluation only, loading model from ", model_path)
         load_dict = torch.load(model_path)
-        features.load_state_dict(load_dict['features'])
         classifier.load_state_dict(load_dict['classifier'])
-    
+        features.load_state_dict(load_dict['features'])
 
-    opt = torch.optim.Adam(all_parameters, meta_lr)
-    loss = nn.BCEWithLogitsLoss()
+
 
     if args.eval_only:
         f_name = os.path.join('results/test/', args.test_dataset, args.name) + '.json'
@@ -151,15 +152,15 @@ def main(args, device):
             meta_train_bler = 0.0
             meta_train_ber_list = []
             meta_train_bler_list = []
-            if not args.eval_only:
 
+            if not args.eval_only:
                 for task in range(meta_batch_size):
                     # Compute meta-training loss
-                    learner = features.clone()
+                    learner = classifier.clone()
                     batch = tasksets.train.sample(task_aug=args.task_aug)
                     evaluation_error, evaluation_ber, evaluation_bler = fast_adapt(batch,
                                                                                 learner,
-                                                                                classifier,
+                                                                                features,
                                                                                 loss,
                                                                                 adaptation_steps,
                                                                                 shots,
@@ -193,11 +194,11 @@ def main(args, device):
 
                 for task in range(num_val_tasks):
                     # Compute meta-validation loss
-                    learner = features.clone()
+                    learner = classifier.clone()
                     batch = tasksets.validation.sample(task)
                     evaluation_error, evaluation_ber, evaluation_bler = fast_adapt(batch,
                                                                                    learner,
-                                                                                   classifier,
+                                                                                   features,
                                                                                    loss,
                                                                                    adaptation_steps,
                                                                                    shots,
@@ -242,13 +243,13 @@ def main(args, device):
                 meta_0shot_ber_list = []
                 meta_0shot_bler_list = []
                 for task in range(num_val_tasks):
-                    learner = features.clone()
+                    learner = classifier.clone()
                     batch = tasksets.validation.sample(task)
                     eva_0shot_error, eva_0shot_ber, eva_0shot_bler = eva_wo_adapt(batch,
-                                                                                  learner,
-                                                                                  classifier,
-                                                                                  loss,
-                                                                                  device)
+                                                                                   learner,
+                                                                                   features, 
+                                                                                   loss,
+                                                                                   device)
                     meta_0shot_error += eva_0shot_error.item()
                     meta_0shot_ber += eva_0shot_ber.item()
                     meta_0shot_bler += eva_0shot_bler.item()
@@ -269,17 +270,14 @@ def main(args, device):
                                           '0shot_ber_std': np.std(meta_0shot_ber_list),
                                           '0shot_bler_std': np.std(meta_0shot_bler_list),
                                           }
-
-                update_json_experiment_log_dict(experiment_update_dict, f_name)
-                # -------------------------zeroshot-----------------------------
-                if args.eval_only: exit()
                                           
-                
+                update_json_experiment_log_dict(experiment_update_dict, f_name)
+                if args.eval_only: exit()
 
             if iteration % save_model_freq == (save_model_freq - 1):
                 torch.save(
                     {'classifier': classifier.state_dict(), 'features': features.state_dict()},
-                    f=os.path.join('models', args.name +"_" +str(iteration)+ ".pt"))
+                    f=os.path.join('saved_models', args.name +"_" +str(iteration)+ ".pt"))
             pbar_epochs.update(1)
 
     total_time = time.time() - time_start

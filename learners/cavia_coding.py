@@ -266,7 +266,7 @@ def main(args, device):
                 if args.eval_only: exit()
 
             if iteration % save_model_freq == (save_model_freq - 1):
-                torch.save(cavia.state_dict(), f=os.path.join('models', args.name + "_" + str(iteration) + ".pt"))
+                torch.save(cavia.state_dict(), f=os.path.join('saved_models', args.name + "_" + str(iteration) + ".pt"))
             pbar_epochs.update(1)
 
     learner.reset_context_params()

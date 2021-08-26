@@ -382,7 +382,7 @@ def main(args, device):
                 total_val_time += time.time() - val_time_start
                 
             if iteration % save_model_freq == (save_model_freq - 1):
-                torch.save(model.state_dict(), f=os.path.join('models', args.name + "_" + str(iteration) + ".pt"))
+                torch.save(model.state_dict(), f=os.path.join('saved_models', args.name + "_" + str(iteration) + ".pt"))
             pbar_epochs.update(1)
 
     total_time = time.time() - time_start
