@@ -70,9 +70,9 @@ def main(args, device):
     meta_lr = 0.001  # 0.003
     fast_lr = 0.1
     adaptation_steps = 5
-    num_iterations = 50000
-    meta_valid_freq = 10000
-    save_model_freq = 2000
+    num_iterations = args.num_iterations
+    meta_valid_freq = args.meta_valid_freq
+    save_model_freq = args.save_model_freq 
     num_context_params = args.num_context_params
     
     context_in = [False, False, False, False, False]

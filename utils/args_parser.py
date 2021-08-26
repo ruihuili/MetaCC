@@ -23,6 +23,11 @@ def get_args():
 
     parser.add_argument('--name', type=str, default="tmp", help="Name of the experiment")
     parser.add_argument('--name_of_args_json_file', type=str, default="None")
+
+    parser.add_argument('--num_iterations', type=int, default=80000, help="Total number of iterations")
+    parser.add_argument('--meta_valid_freq', type=int, default=10000, help="Meta valid every n iterations")
+    parser.add_argument('--save_model_freq', type=int, default=2000, help="Save model every n iterations") 
+
     parser.add_argument('--disable_pbar', type=str, default="True")
     parser.add_argument('--start_iter', type=int, default=0, help='starting an experiment at step')
     parser.add_argument('--resume', action='store_true', default=False, help='resuming an experiment, use in conjunction with start_iter')

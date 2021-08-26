@@ -126,9 +126,9 @@ def main(args, device):
     adaptation_steps = args.adapt_steps#5
 
     print("Meta LR ", meta_lr, " inner loop LR ", fast_lr, " adaptation steps ", adaptation_steps)
-    num_iterations = 200000
-    meta_valid_freq = 10000
-    save_model_freq = 2000
+    num_iterations = args.num_iterations
+    meta_valid_freq = args.meta_valid_freq
+    save_model_freq = args.save_model_freq 
 
     # we could set num_tasks to something arbitrary like 20000
     num_tasks = num_iterations * meta_batch_size

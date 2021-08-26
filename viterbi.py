@@ -56,7 +56,7 @@ def main(args, device):
     fast_lr = 0.1
     adaptation_steps = 5
     num_iterations = 20000
-    meta_valid_freq = 10000
+    meta_valid_freq = args.meta_valid_freq
 
     # we could set num_tasks to something arbitrary like 20000
     num_tasks = num_iterations * meta_batch_size
