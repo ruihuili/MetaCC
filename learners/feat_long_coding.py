@@ -13,7 +13,7 @@ from torch import nn, optim
 
 from data_utils.datasets import get_tasksets
 from models.models import CNN4
-from feat import FEAT
+from learners.feat import FEAT
 from utils.args_parser import get_args
 
 

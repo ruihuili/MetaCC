@@ -23,6 +23,8 @@ if __name__ == '__main__':
         from learners.protonets_coding import main
     elif args.meta_learner.lower() in ["metabaseline"]:
         from learners.metabaseline_long_coding import main
+    elif args.meta_learner.lower() in ["feat"]:
+        from learners.feat_long_coding import main
 
     elif args.meta_learner.lower() in ["viterbi"]:
         from learners.viterbi import main

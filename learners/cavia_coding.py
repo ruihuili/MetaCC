@@ -14,7 +14,7 @@ from data_utils.datasets import get_tasksets
 from models.models import CondConvNet
 from utils.args_parser import get_args
 
-from cavia_algo import CAVIA
+from learners.cavia_algo import CAVIA
 from utils.utils import create_json_experiment_log, update_json_experiment_log_dict, comms_ber, comms_bler
 
 

@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 
-from models import CNN4Encoder
+from models.models import CNN4Encoder
 
 
 class FewShotModel(nn.Module):
