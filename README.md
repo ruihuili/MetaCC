@@ -7,7 +7,7 @@ We currently have implementation 12 meta-learning algorighms, 1 non-meta ERM bas
 # Data Generation
 The file data_utils/gen_channel_data.py contains functions used for generating true messages and encoded messages based on a given channel model and the corresponding params. It provides APIs to the commpy package which implements the convolutional encoder etc. In our current research project, we focus on learning the channel decoder while keeping the encoder fixed. 
 
-Currently, we use pre-generated dataset instead of generating data on-the-fly in order to reduce training time. The dataset will be shared in a different repo, along with the dataset documentation. To run the program in this repo, a users should put this dataset under the same directory as the repo (or create a symbolic link accordingly).  
+Currently, we use pre-generated dataset instead of generating data on-the-fly in order to reduce training time. The dataset is , along with the dataset documentation. To run the program in this repo, a users should put this dataset under the same directory as the repo (or create a symbolic link accordingly).  
 
 ## How to run the code here  
 Create a new environment and install ``learn2learn`` library:  
