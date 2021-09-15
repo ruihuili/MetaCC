@@ -1,4 +1,4 @@
-# MetaCC -- A Channel Coding Benchmark for Meta-Learning
+# MetaCC: A Channel Coding Benchmark for Meta-Learning
 
 This repository provides a benchmarking framework using the channel coding application. We build the codebase based upon learn2learn library.  
 
