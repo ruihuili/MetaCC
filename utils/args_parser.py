@@ -71,6 +71,7 @@ def get_args():
 
     # Experiment specific -- task augmentation
     parser.add_argument('--task_aug', type=str, default="None")
+    parser.add_argument('--noise_family', type=str, default="awgn")
 
 
     args = parser.parse_args()

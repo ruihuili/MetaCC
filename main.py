@@ -28,6 +28,12 @@ if __name__ == '__main__':
 
     elif args.meta_learner.lower() in ["viterbi"]:
         from learners.viterbi import main
+    elif args.meta_learner.lower() in ["sur_pretrain"]:
+        from learners.sur_coding_pretrain import main
+    elif args.meta_learner.lower() in ["sur_eval"]:
+        from learners.sur_coding_eval import main
+    elif args.meta_learner.lower() in ["sur_eval_proto"]:
+        from learners.sur_coding_eval_proto import main
 
 
     main(args, device)

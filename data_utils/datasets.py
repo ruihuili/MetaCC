@@ -1,6 +1,6 @@
 import random
 from collections import namedtuple
-
+import json
 import numpy as np
 import torch
 
@@ -13,7 +13,7 @@ class ChannelCodingTaskDataset:
     and stores them into memory.
     """
 
-    def __init__(self, dataset_name, num_tasks, args, device):
+    def __init__(self, dataset_name, num_tasks, args, device, noise_family=None):
         self.dataset_name = dataset_name
         self.device = device
 
@@ -34,8 +34,20 @@ class ChannelCodingTaskDataset:
         print('Loading data for: ' + self.config, " real data for val? ", args.test_dataset)
         if self.dataset_name == 'train':
             data = np.load('dataset_v2/train/' + self.config + '_data.npz')
-            self.images = data['train_images']
-            self.labels = data['train_labels']
+
+            if noise_family:
+                with open('dataset_v2/train/' + self.config + '_criteria.json', 'r') as f:
+                    criteria = json.load(f)
+
+                filtered_indices = []
+                for idx in range(len(criteria['criteria'])):
+                    if criteria['criteria'][idx]['noise_type'] == noise_family:
+                        filtered_indices.append(idx)
+                self.images = data['train_images'][filtered_indices]
+                self.labels = data['train_labels'][filtered_indices]
+            else:
+                self.images = data['train_images']
+                self.labels = data['train_labels']
             print("train shapes", np.shape(self.images), np.shape(self.labels))
             # sample data to get smaller sets of tasks
             num_setting, num_classes, _, _, _ = list(np.shape(self.images))
@@ -687,9 +699,10 @@ BenchmarkTasksets = namedtuple(
     'BenchmarkTasksets', ('train', 'validation', 'test'))
 
 
-def get_tasksets(num_tasks, args, device):
-    train_tasks = ChannelCodingTaskDataset("train", num_tasks, args, device)
-    val_tasks = ChannelCodingTaskDataset("val", num_tasks, args, device)
-    test_tasks = ChannelCodingTaskDataset("test", num_tasks, args, device)
+def get_tasksets(num_tasks, args, device, noise_family=None):
+    train_tasks = ChannelCodingTaskDataset("train", num_tasks, args, device, noise_family)
+    val_tasks = ChannelCodingTaskDataset("val", num_tasks, args, device, noise_family)
+    test_tasks = ChannelCodingTaskDataset(
+        "test", num_tasks, args, device, noise_family)
 
     return BenchmarkTasksets(train_tasks, val_tasks, test_tasks)
