@@ -1,6 +1,6 @@
 # MetaCC: A Channel Coding Benchmark for Meta-Learning
 
-This repository provides a benchmarking framework using the channel coding application, as introduced in our [Paper](https://arxiv.org/pdf/2107.07579.pdf) (Accepted at NeurIPS'21 Benchmarks Track). We build the codebase based upon learn2learn library.  
+This repository provides a benchmarking framework using the channel coding application, as introduced in our [[Paper](https://arxiv.org/pdf/2107.07579.pdf)] (Accepted at NeurIPS'21 Benchmarks Track). We build the codebase based upon learn2learn library.  
 
 We currently have implementations of the following algorithms for the channel decoding task:   
 - 12 meta-learning algorighms, including: MAML, MAML + FOMAML, Reptile, Meta-SGD, Meta-KFO, ANIL, MetaCurvature, CAVIA, BOIL, ProtoNets, FEAT, and MetaBaseline.  
@@ -35,12 +35,12 @@ notebooks/CreateDataset.ipynb as the name suggests, creates dataset
 If you find this repo useful, feel free to give it a :star2: and cite our paper:  
 
 @inproceedings{
-li2021a,
-title={A Channel Coding Benchmark for Meta-Learning},
-author={Rui Li and Ondrej Bohdal and Rajesh K Mishra and Hyeji Kim and Da Li and Nicholas Donald Lane and Timothy Hospedales},
-booktitle={Thirty-fifth Conference on Neural Information Processing Systems Datasets and Benchmarks Track},
-year={2021},
-url={https://openreview.net/forum?id=DjzPaX8AT0z}
+metacc2021a,  
+title={A Channel Coding Benchmark for Meta-Learning},  
+author={Rui Li and Ondrej Bohdal and Rajesh K Mishra and Hyeji Kim and Da Li and Nicholas Donald Lane and Timothy Hospedales},  
+booktitle={Thirty-fifth Conference on Neural Information Processing Systems Datasets and Benchmarks Track},  
+year={2021},  
+url={https://openreview.net/forum?id=DjzPaX8AT0z}. 
 }
 
 # Main Contributors 
