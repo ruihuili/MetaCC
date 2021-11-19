@@ -23,7 +23,7 @@ cd standard
 Get the pre-gen-ed dataset and put under current directory run with compulsory argument name_of_args_json_file which specify an input .json file  
 
 ```
-python maml.py --meta_learner maml --name_of_args_json_file configs/set_nd_15ts_5cls/awgn_mid_higher.json  
+python main.py --meta_learner maml --name_of_args_json_file configs/set_nd_15ts_5cls/awgn_mid_higher.json  
 ```
 
 ## Details
