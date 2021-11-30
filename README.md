@@ -14,7 +14,7 @@ Currently, we use pre-generated dataset instead of generating data on-the-fly in
 
 ## How to run the code here  
 Create a new environment and install ``learn2learn`` library:  
-```
+```bash
 conda create -n l2l python=3.6
 pip install learn2learn
 pip install tqdm
@@ -22,7 +22,7 @@ cd standard
 ```
 Get the pre-gen-ed dataset and put under current directory run with compulsory argument name_of_args_json_file which specify an input .json file  
 
-```
+```bash
 python main.py --meta_learner maml --name_of_args_json_file configs/set_nd_15ts_5cls/awgn_mid_higher.json  
 ```
 
@@ -34,6 +34,7 @@ notebooks/CreateDataset.ipynb as the name suggests, creates dataset
 ## Citation
 If you find this repo useful, feel free to give it a :star2: and cite our paper:  
 
+```bibtex
 @inproceedings{
 metacc2021a,  
 title={A Channel Coding Benchmark for Meta-Learning},  
@@ -42,6 +43,7 @@ booktitle={Thirty-fifth Conference on Neural Information Processing Systems Data
 year={2021},  
 url={https://openreview.net/forum?id=DjzPaX8AT0z}. 
 }
+```
 
 # Main Contributors 
 Rui Li (Rui.Li@samsung.com)   
