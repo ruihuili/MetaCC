@@ -31,6 +31,7 @@ Implementation of training of each algorithm is in learners (including viterbi).
 notebooks/Benchmark.ipynb containes code to produce data presented in our paper  
 notebooks/CreateDataset.ipynb as the name suggests, creates dataset
 
+
 ## Citation
 If you find this repo useful, feel free to give it a :star2: and cite our paper:  
 
@@ -44,6 +45,10 @@ year={2021},
 url={https://openreview.net/forum?id=DjzPaX8AT0z}. 
 }
 ```
+
+## Poster 
+
+![poster](./docs/NeurIPS21_poster.png)
 
 # Main Contributors 
 Rui Li (Rui.Li@samsung.com)   
