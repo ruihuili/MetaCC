@@ -1,6 +1,6 @@
 # MetaCC: A Channel Coding Benchmark for Meta-Learning
 
-This repository provides a benchmarking framework using the channel coding application, as introduced in our [[Paper](https://arxiv.org/pdf/2107.07579.pdf)] (Accepted at NeurIPS'21 Benchmarks Track). We build the codebase based upon learn2learn library.  
+This repository provides a benchmarking framework for meta-learning using the channel coding tasks, as introduced in our [[Paper](https://arxiv.org/pdf/2107.07579.pdf)] in NeurIPS2021 Benchmarks Track. We build the codebase based upon learn2learn library.  
 
 We currently have implementations of the following algorithms for the channel decoding task:   
 - 12 meta-learning algorighms, including: MAML, MAML + FOMAML, Reptile, Meta-SGD, Meta-KFO, ANIL, MetaCurvature, CAVIA, BOIL, ProtoNets, FEAT, and MetaBaseline.  
@@ -8,26 +8,27 @@ We currently have implementations of the following algorithms for the channel de
 - and 1 non-ML baseline called Viterbi.  
 
 # Data Generation  
-The file data_utils/gen_channel_data.py contains functions used for generating true messages and encoded messages based on a given channel model and the corresponding params. It provides APIs to the commpy package which implements the convolutional encoder etc. In our current research project, we focus on learning the channel decoder while keeping the encoder fixed. 
+We use [commpy](https://github.com/veeresht/CommPy/blob/master/doc/index.rst)]'s implemention of the convolutional encoder and viterbi decoder. 
+The file data_utils/gen_channel_data.py contains functions used for generating true messages, encoding (via API to commpy), and the noise injection to coded bits. 
 
-Currently, we use pre-generated dataset instead of generating data on-the-fly in order to reduce training time. The dataset is produced using notebooks/CreateDataset.ipynb. To run the program in this repo, a users should put this dataset under the same directory as the repo (or create a symbolic link accordingly).  
+Currently, we use pre-generated dataset instead of generating data on-the-fly in order to reduce the total training time. The dataset is produced using notebooks/CreateDataset.ipynb. 
+
+To reproduce our results or run the code in this repo as is, download our pre-generated ([dataset](https://drive.google.com/drive/folders/1d5Txip4sryfL4kIv-PY3AjzJcwa2qiMK)] and place it under the same directory as the repo or create a symbolic link accordingly.
 
 ## How to run the code here  
-Create a new environment and install ``learn2learn`` library:  
+Create a new environment if needed and install ``learn2learn`` library:  
 ```bash
 conda create -n l2l python=3.6
 pip install learn2learn
-pip install tqdm
-cd standard
 ```
-Get the pre-gen-ed dataset and put under current directory run with compulsory argument name_of_args_json_file which specify an input .json file  
+Get the pre-generated-ed dataset and put under current directory run with compulsory argument name_of_args_json_file which specify an input .json file  
 
 ```bash
 python main.py --meta_learner maml --name_of_args_json_file configs/set_nd_15ts_5cls/awgn_mid_higher.json  
 ```
 
 ## Details
-Implementation of training of each algorithm is in learners (including viterbi). We use a number of Json files under config/set_nd_15ts_5cl/* to specify specific training parameters for the channel noise. A number of utility tools e.g. parser can be found unter the sub-dir "/utils/". We currently use 4 layer CNN for all algorithms. 
+We use a number of Json files under config/set_nd_15ts_5cl/* to specify specific training parameters for the channel noise. A number of utility tools e.g. parser can be found unter the sub-dir "/utils/". We currently use 4 layer CNN for all algorithms. 
 notebooks/Benchmark.ipynb containes code to produce data presented in our paper  
 notebooks/CreateDataset.ipynb as the name suggests, creates dataset
 
