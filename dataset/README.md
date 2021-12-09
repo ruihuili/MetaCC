@@ -1,4 +1,7 @@
-This is a README doc for the channel dataset we publish along MetaCC project. 
+Download the dataset [[here](https://drive.google.com/drive/folders/1QTTPxyylBJntAru2b_KZ39tNZZMl_WfG?usp=sharing)]
+
+This is a README doc for the channel dataset we publish along MetaCC project: https://github.com/ruihuili/MetaCC.git 
+
 This dataset contains the synthetic & real channel data. 
 
 # Synthetic Data
