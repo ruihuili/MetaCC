@@ -8,12 +8,12 @@ We currently have implementations of the following algorithms for the channel de
 - and 1 non-ML baseline called Viterbi.  
 
 # Data Generation  
-We use [commpy](https://github.com/veeresht/CommPy/blob/master/doc/index.rst)]'s implemention of the convolutional encoder and viterbi decoder. 
+We use [[commpy](https://github.com/veeresht/CommPy/blob/master/doc/index.rst)]'s implemention of the convolutional encoder and viterbi decoder. 
 The file data_utils/gen_channel_data.py contains functions used for generating true messages, encoding (via API to commpy), and the noise injection to coded bits. 
 
 Currently, we use pre-generated dataset instead of generating data on-the-fly in order to reduce the total training time. The dataset is produced using notebooks/CreateDataset.ipynb. 
 
-To reproduce our results or run the code in this repo as is, download our pre-generated ([dataset](https://drive.google.com/drive/folders/1d5Txip4sryfL4kIv-PY3AjzJcwa2qiMK)] and place it under the same directory as the repo or create a symbolic link accordingly.
+To reproduce our results or run the code in this repo as is, download our pre-generated [[dataset](https://drive.google.com/drive/folders/1d5Txip4sryfL4kIv-PY3AjzJcwa2qiMK)] and place it under the same directory as the repo or create a symbolic link accordingly.
 
 ## How to run the code here  
 Create a new environment if needed and install ``learn2learn`` library:  
