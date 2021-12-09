@@ -13,7 +13,11 @@ The file data_utils/gen_channel_data.py contains functions used for generating t
 
 Currently, we use pre-generated dataset instead of generating data on-the-fly in order to reduce the total training time. The dataset is produced using notebooks/CreateDataset.ipynb. 
 
-To reproduce our results or run the code in this repo as is, download our pre-generated [[dataset](https://drive.google.com/drive/folders/1d5Txip4sryfL4kIv-PY3AjzJcwa2qiMK)] and place it under the same directory as the repo or create a symbolic link accordingly.
+
+## Public Dataset
+To reproduce our results or run the code in this repo as is, download our pre-generated [[dataset](https://drive.google.com/drive/folders/1QTTPxyylBJntAru2b_KZ39tNZZMl_WfG?usp=sharing)] and place it under the same directory as the repo or create a symbolic link accordingly. 
+
+Documentations of this dataset can be found  [[here](https://github.com/ruihuili/MetaCC/tree/master/dataset)]
 
 ## How to run the code here  
 Create a new environment if needed and install ``learn2learn`` library:  
